@@ -18,13 +18,13 @@ from math import radians, sin, cos, ceil, sqrt
 import arcpy
 from arcpy import env
 
-arcpy.env.workspace = r"C:\arcgis\shade_a_lator\shadeOutput"
+arcpy.env.workspace = r"C:\Google Drive\SiCr_Digitization\scripts\data"
 env.overwriteOutput = True
 
 # Local variables:
-##dataSheet = r"C:\arcgis\shade_a_lator\scripts\output2.xlsx"
+##dataSheet = r"C:\Google Drive\SiCr_Digitization\scripts\output2.xlsx"
 ##shade_fc = "shade_fc"
-##shade_fc_shp = r"C:\arcgis\shade_a_lator\shadeOutput"
+##shade_fc_shp = r"C:\Google Drive\SiCr_Digitization\shadeOutput"
 ##shade_fc_shp = shade_fc_shp + "\\" + shade_fc + ".shp"
 
 

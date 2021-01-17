@@ -59,11 +59,11 @@ gc.enable()
 ################################################################################
 
 nodes_fc = arcpy.GetParameterAsText(0)
-exel_filename = r"C:\arcgis\shade_a_lator\scripts\blankMainMenu.xlsx"
-exel_filename2 = r"C:\arcgis\shade_a_lator\scripts\blank.xlsx"
+exel_filename = r"C:\Google Drive\SiCr_Digitization\scripts\blankMainMenu.xlsx"
+exel_filename2 = r"C:\Google Drive\SiCr_Digitization\scripts\blank.xlsx"
 runName = arcpy.GetParameterAsText(1)
-saveName = r"C:\arcgis\shade_a_lator\scripts\output.xlsx"
-saveName2 = r"C:\arcgis\shade_a_lator\scripts\output2.xlsx"
+saveName = r"C:\Google Drive\SiCr_Digitization\scripts\output.xlsx"
+saveName2 = r"C:\Google Drive\SiCr_Digitization\scripts\output2.xlsx"
 sheetName = "Main Menu"
 
 
@@ -96,8 +96,8 @@ riparianExtinction = arcpy.GetParameterAsText(15)
 
 ################################################################################
 
-shadelatorPath = r"C:\arcgis\shade_a_lator\scripts\shade_GD.xlsm"
-shadelatorSavePath = r"C:\arcgis\shade_a_lator\scripts\shadeResults_GD.xlsm"
+shadelatorPath = r"C:\Google Drive\SiCr_Digitization\scripts\shade_GD.xlsm"
+shadelatorSavePath = r"C:\Google Drive\SiCr_Digitization\scripts\shadeResults_GD.xlsm"
 
 
 def extractData(fc,fieldList):
@@ -215,11 +215,9 @@ try:
     def offsetBy1(listName):
         ans =[]
         for row in listName:
-            row = float(row)
+            row = int(row)
             if row < 0:
                 row = 0
-            if row > 5000: # also setting max to 5000
-                row = 5000
             ans.append(row+1)
         return ans
 
