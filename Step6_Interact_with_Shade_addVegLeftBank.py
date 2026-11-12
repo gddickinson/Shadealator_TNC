@@ -27,6 +27,10 @@ import openpyxl
 import win32com.client
 import io
 
+# NoData / distance / incision helpers (keep Step6_shade_inputs.py next to this script)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from Step6_shade_inputs import NodataTracker, keep_blank, node_distances, incisions
+
 #enable garbage collection
 gc.enable()
 
@@ -203,13 +207,17 @@ try:
             ans.append(row)
         return ans
 
+    # off-raster samples (-9999) are written as blank cells and the node is flagged
+    # (they used to go through setToZero and reach Shade-a-lator as 0 m)
+    nodata = NodataTracker()
+
     #setting elevation less than 0 to 0 to avoid error in shadelator
-    ELEVATION = setToZero(extractData(nodes_fc, 'ELEVATION'))
+    ELEVATION = keep_blank(setToZero, nodata.blank(extractData(nodes_fc, 'ELEVATION')))
 
     #setting topographic angles less than 0 to 0 to avoid error in shadelator
-    TOPO_W = setToZero(extractData(nodes_fc, 'TOPO_W'))
-    TOPO_S = setToZero(extractData(nodes_fc, 'TOPO_S'))
-    TOPO_E = setToZero(extractData(nodes_fc, 'TOPO_E'))
+    TOPO_W = keep_blank(setToZero, nodata.blank(extractData(nodes_fc, 'TOPO_W')))
+    TOPO_S = keep_blank(setToZero, nodata.blank(extractData(nodes_fc, 'TOPO_S')))
+    TOPO_E = keep_blank(setToZero, nodata.blank(extractData(nodes_fc, 'TOPO_E')))
 
     #adding offest to get round problem with Riparian Code 0 generation in shadelator
     def offsetBy1(listName):
@@ -236,47 +244,52 @@ try:
         return ans
 
     #T1 = left bank
-    LC_T1_S1 = addLC(extractData(nodes_fc, 'LC_T1_S1'))
-    LC_T1_S2 = offsetBy1(extractData(nodes_fc, 'LC_T1_S2'))
-    LC_T1_S3 = offsetBy1(extractData(nodes_fc, 'LC_T1_S3'))
-    LC_T1_S4 = offsetBy1(extractData(nodes_fc, 'LC_T1_S4'))
-    LC_T1_S5 = offsetBy1(extractData(nodes_fc, 'LC_T1_S5'))
-    LC_T1_S6 = offsetBy1(extractData(nodes_fc, 'LC_T1_S6'))
-    LC_T1_S7 = offsetBy1(extractData(nodes_fc, 'LC_T1_S7'))
-    LC_T1_S8 = offsetBy1(extractData(nodes_fc, 'LC_T1_S8'))
-    LC_T1_S9 = offsetBy1(extractData(nodes_fc, 'LC_T1_S9'))
+    LC_T1_S1 = keep_blank(addLC, nodata.blank(extractData(nodes_fc, 'LC_T1_S1')))
+    LC_T1_S2 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S2')))
+    LC_T1_S3 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S3')))
+    LC_T1_S4 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S4')))
+    LC_T1_S5 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S5')))
+    LC_T1_S6 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S6')))
+    LC_T1_S7 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S7')))
+    LC_T1_S8 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S8')))
+    LC_T1_S9 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T1_S9')))
 
     #T2 = right bank
-    LC_T2_S1 = offsetBy1(extractData(nodes_fc, 'LC_T2_S1'))
-    LC_T2_S2 = offsetBy1(extractData(nodes_fc, 'LC_T2_S2'))
-    LC_T2_S3 = offsetBy1(extractData(nodes_fc, 'LC_T2_S3'))
-    LC_T2_S4 = offsetBy1(extractData(nodes_fc, 'LC_T2_S4'))
-    LC_T2_S5 = offsetBy1(extractData(nodes_fc, 'LC_T2_S5'))
-    LC_T2_S6 = offsetBy1(extractData(nodes_fc, 'LC_T2_S6'))
-    LC_T2_S7 = offsetBy1(extractData(nodes_fc, 'LC_T2_S7'))
-    LC_T2_S8 = offsetBy1(extractData(nodes_fc, 'LC_T2_S8'))
-    LC_T2_S9 = offsetBy1(extractData(nodes_fc, 'LC_T2_S9'))
+    LC_T2_S1 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S1')))
+    LC_T2_S2 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S2')))
+    LC_T2_S3 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S3')))
+    LC_T2_S4 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S4')))
+    LC_T2_S5 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S5')))
+    LC_T2_S6 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S6')))
+    LC_T2_S7 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S7')))
+    LC_T2_S8 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S8')))
+    LC_T2_S9 = keep_blank(offsetBy1, nodata.blank(extractData(nodes_fc, 'LC_T2_S9')))
 
-    ELE_T1_S1 = extractData(nodes_fc, 'ELE_T1_S1')
-    ELE_T1_S2 = extractData(nodes_fc, 'ELE_T1_S2')
-    ELE_T1_S3 = extractData(nodes_fc, 'ELE_T1_S3')
-    ELE_T1_S4 = extractData(nodes_fc, 'ELE_T1_S4')
-    ELE_T1_S5 = extractData(nodes_fc, 'ELE_T1_S5')
-    ELE_T1_S6 = extractData(nodes_fc, 'ELE_T1_S6')
-    ELE_T1_S7 = extractData(nodes_fc, 'ELE_T1_S7')
-    ELE_T1_S8 = extractData(nodes_fc, 'ELE_T1_S8')
-    ELE_T1_S9 = extractData(nodes_fc, 'ELE_T1_S9')
+    ELE_T1_S1 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S1'))
+    ELE_T1_S2 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S2'))
+    ELE_T1_S3 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S3'))
+    ELE_T1_S4 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S4'))
+    ELE_T1_S5 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S5'))
+    ELE_T1_S6 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S6'))
+    ELE_T1_S7 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S7'))
+    ELE_T1_S8 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S8'))
+    ELE_T1_S9 = nodata.blank(extractData(nodes_fc, 'ELE_T1_S9'))
 
-    ELE_T2_S1 = extractData(nodes_fc, 'ELE_T2_S1')
-    ELE_T2_S2 = extractData(nodes_fc, 'ELE_T2_S2')
-    ELE_T2_S3 = extractData(nodes_fc, 'ELE_T2_S3')
-    ELE_T2_S4 = extractData(nodes_fc, 'ELE_T2_S4')
-    ELE_T2_S5 = extractData(nodes_fc, 'ELE_T2_S5')
-    ELE_T2_S6 = extractData(nodes_fc, 'ELE_T2_S6')
-    ELE_T2_S7 = extractData(nodes_fc, 'ELE_T2_S7')
-    ELE_T2_S8 = extractData(nodes_fc, 'ELE_T2_S8')
-    ELE_T2_S9 = extractData(nodes_fc, 'ELE_T2_S9')
+    ELE_T2_S1 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S1'))
+    ELE_T2_S2 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S2'))
+    ELE_T2_S3 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S3'))
+    ELE_T2_S4 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S4'))
+    ELE_T2_S5 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S5'))
+    ELE_T2_S6 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S6'))
+    ELE_T2_S7 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S7'))
+    ELE_T2_S8 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S8'))
+    ELE_T2_S9 = nodata.blank(extractData(nodes_fc, 'ELE_T2_S9'))
 
+
+    NODATA_FLAG = nodata.flag_column()
+    if sum(NODATA_FLAG):
+        arcpy.AddWarning("{0} nodes have NoData (-9999) inputs: written as blank cells, "
+                         "flagged 1 in the NODATA column of {1}".format(sum(NODATA_FLAG), saveName2))
 
     numberNodes = len(FID)
     DISTANCE = []
@@ -296,6 +309,8 @@ try:
     writeColumn(ELEVATION,excel_output,"Sheet1",2,'C')
     writeColumn(LATITUDE,excel_output,"Sheet1",2,'D')
     writeColumn(LONGITUDE,excel_output,"Sheet1",2,'E')
+    writeCell("NODATA",excel_output,"Sheet1",1,'G')
+    writeColumn(NODATA_FLAG,excel_output,"Sheet1",2,'G')
 
 
     writeColumn(STREAM_ID,excel_shade,sheetName,17,'A')

@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { run } from './pipeline.js';
-import { calculateGradient, STEP6, addLC, setToZero } from './ttools_engine.js';
+import { calculateGradient, STEP6, addLC, setToZero, step6Rows } from './ttools_engine.js';
 import { rasters } from './scene.js';
 
 const fx = JSON.parse(readFileSync(new URL('../../../tests/fixtures/engine_cases.json', import.meta.url), 'utf8'));
@@ -41,5 +41,13 @@ deepClose(inp.map(setToZero), fx.transforms.out.step6.setToZero, 'setToZero');
 deepClose(inp.map(STEP6.step6.offset), fx.transforms.out.step6.offsetBy1, 'offsetBy1 (Step6)');
 deepClose(inp.map(STEP6.step6_addveg.offset), fx.transforms.out.step6_addveg.offsetBy1, 'offsetBy1 (addVeg)');
 deepClose(inp.map(addLC), fx.transforms.out.step6_addveg.addLC, 'addLC');
+
+// Step 6 NoData: -9999 inputs become null and flag the row, in every Step 6 script.
+for (const [variant, rows] of Object.entries(fx.step6_nodata.rows)) {
+  const js = step6Rows(fx.step6_nodata.nodes, variant, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  deepClose(js, rows, `step6 nodata ${variant}`);
+  assert.deepEqual(js.map(r => r.nodata), [0, 1, 1, 1, 0, 0, 0]);
+  assert.equal(js[1].elevation, null);
+}
 
 console.log(`pipeline.test.mjs: ${checks} checks passed over ${Object.keys(fx.cases).length} scenes`);

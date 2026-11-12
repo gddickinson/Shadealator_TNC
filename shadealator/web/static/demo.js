@@ -33,9 +33,9 @@ function step6Csv(res) {
   const z = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   const head = ['node', 'distance_m', 'elevation_m', 'aspect_deg', 'wetted_width_m', 'nsdz_width_m', 'incision_m',
     'topo_w', 'topo_s', 'topo_e', ...z.map(i => 'lc_left_' + i), ...z.map(i => 'lc_right_' + i),
-    ...z.map(i => 'ele_left_' + i), ...z.map(i => 'ele_right_' + i)];
+    ...z.map(i => 'ele_left_' + i), ...z.map(i => 'ele_right_' + i), 'nodata'];
   const rows = res.step6.map(r => [r.node, r.distance, r.elevation, r.aspect, r.wetted_width, r.nsdz_width, r.incision,
-    r.topo_w, r.topo_s, r.topo_e, ...r.lc_left, ...r.lc_right, ...r.ele_left, ...r.ele_right].join(','));
+    r.topo_w, r.topo_s, r.topo_e, ...r.lc_left, ...r.lc_right, ...r.ele_left, ...r.ele_right, r.nodata].map(v => v ?? '').join(','));
   return [head.join(','), ...rows].join('\n') + '\n';
 }
 

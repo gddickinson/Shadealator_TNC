@@ -97,16 +97,25 @@ export const STEP6 = {
   step6_addveg_right: { offset: offsetVeg, add: ['LC_T2_S1'] },
 };
 
+// Step6_shade_inputs.py: off-raster samples (-9999), None or NaN are NoData; they are written as blank cells (null)
+// and flag the node, instead of passing through setToZero / offsetBy1 as 0 m / code 1.
+export const isNodata = v => v == null || Number.isNaN(v) || v < -9998;
+
 // The Shade-a-lator "Main Menu" columns Step 6 writes, one object per node in feature-class order.
 export function step6Rows(nodes, variant, zones) {
   const v = STEP6[variant];
   if (!v) throw new Error(`unknown Step 6 variant ${variant}`);
-  const lc = (n, t, z) => { const k = `LC_T${t}_S${z}`; return (v.add.includes(k) ? addLC : v.offset)(n[k]); };
-  return nodes.map((n, i) => ({
-    node: n.STREAM_ID, distance: i * 50, elevation: setToZero(n.ELEVATION), aspect: n.STRM_AZMTH,
+  const flags = nodes.map(() => 0);
+  const val = (i, k, fn = x => x) => { const x = nodes[i][k]; if (isNodata(x)) { flags[i] = 1; return null; } return fn(x); };
+  const lcFn = k => (v.add.includes(k) ? addLC : v.offset);
+  const rows = nodes.map((n, i) => ({
+    node: n.STREAM_ID, distance: i * 50, elevation: val(i, 'ELEVATION', setToZero), aspect: n.STRM_AZMTH,
     wetted_width: n.CHANWIDTH, nsdz_width: n.CHANWIDTH, incision: 1.0,
-    topo_w: setToZero(n.TOPO_W), topo_s: setToZero(n.TOPO_S), topo_e: setToZero(n.TOPO_E),
-    lc_left: zones.map(z => lc(n, 1, z)), lc_right: zones.map(z => lc(n, 2, z)),
-    ele_left: zones.map(z => n[`ELE_T1_S${z}`]), ele_right: zones.map(z => n[`ELE_T2_S${z}`]),
+    topo_w: val(i, 'TOPO_W', setToZero), topo_s: val(i, 'TOPO_S', setToZero), topo_e: val(i, 'TOPO_E', setToZero),
+    lc_left: zones.map(z => val(i, `LC_T1_S${z}`, lcFn(`LC_T1_S${z}`))),
+    lc_right: zones.map(z => val(i, `LC_T2_S${z}`, lcFn(`LC_T2_S${z}`))),
+    ele_left: zones.map(z => val(i, `ELE_T1_S${z}`)), ele_right: zones.map(z => val(i, `ELE_T2_S${z}`)),
   }));
+  rows.forEach((r, i) => { r.nodata = flags[i]; });
+  return rows;
 }

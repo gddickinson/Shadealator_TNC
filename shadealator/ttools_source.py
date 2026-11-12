@@ -69,6 +69,16 @@ def load(script: str, names: tuple) -> dict:
     return {n: ns[n] for n in names}
 
 
+@lru_cache(maxsize=None)
+def step6_helpers():
+    """Step6_shade_inputs.py (pure, shared by the Step 6 scripts), imported from the repository root."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("Step6_shade_inputs", ROOT / "Step6_shade_inputs.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def set_globals(funcs: dict, **values) -> None:
     """Set script-level globals read by extracted functions (e.g. perp=True, con_from_m=1.0)."""
     for f in funcs.values():

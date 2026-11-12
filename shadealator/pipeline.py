@@ -92,17 +92,28 @@ STEP6_LC = {  # which transform each Step 6 script applies to the LC zone column
 
 
 def step6_rows(nodes: list, variant: str = "step6") -> list:
-    """The Shade-a-lator 'Main Menu' inputs Step 6 writes, one dict per node in feature-class order."""
+    """The Shade-a-lator 'Main Menu' inputs Step 6 writes, one dict per node in feature-class order.
+
+    As the scripts do: NoData (-9999) values become None (blank cells) and set the row's `nodata` flag; the other
+    values go through the chosen script's setToZero / offsetBy1 / addLC.
+    """
     names = ("setToZero", "offsetBy1") + (("addLC",) if variant != "step6" else ())
     f = ts.load(variant, names)
-    col = lambda k: [n[k] for n in nodes]  # noqa: E731 - extractData(nodes_fc, k)
-    out = {"ELEVATION": f["setToZero"](col("ELEVATION"))}
+    h = ts.step6_helpers()
+    nodata = h.NodataTracker()
+    col = lambda k: nodata.blank([n[k] for n in nodes])  # noqa: E731 - nodata.blank(extractData(nodes_fc, k))
+    out = {"ELEVATION": h.keep_blank(f["setToZero"], col("ELEVATION"))}
     for d in "WSE":
-        out["TOPO_" + d] = f["setToZero"](col("TOPO_" + d))
+        out["TOPO_" + d] = h.keep_blank(f["setToZero"], col("TOPO_" + d))
     for t in (1, 2):
         for z in ZONES:
             k = "LC_T%d_S%d" % (t, z)
-            out[k] = f[STEP6_LC[variant].get(k, "offsetBy1")](col(k))
+            out[k] = h.keep_blank(f[STEP6_LC[variant].get(k, "offsetBy1")], col(k))
+    for t in (1, 2):
+        for z in ZONES:
+            k = "ELE_T%d_S%d" % (t, z)
+            out[k] = col(k)
+    flags = nodata.flag_column()
     rows, dist = [], 0
     for i, n in enumerate(nodes):
         rows.append({
@@ -110,7 +121,8 @@ def step6_rows(nodes: list, variant: str = "step6") -> list:
             "wetted_width": n["CHANWIDTH"], "nsdz_width": n["CHANWIDTH"], "incision": 1.0,
             "topo_w": out["TOPO_W"][i], "topo_s": out["TOPO_S"][i], "topo_e": out["TOPO_E"][i],
             "lc_left": [out["LC_T1_S%d" % z][i] for z in ZONES], "lc_right": [out["LC_T2_S%d" % z][i] for z in ZONES],
-            "ele_left": [n["ELE_T1_S%d" % z] for z in ZONES], "ele_right": [n["ELE_T2_S%d" % z] for z in ZONES],
+            "ele_left": [out["ELE_T1_S%d" % z][i] for z in ZONES],
+            "ele_right": [out["ELE_T2_S%d" % z][i] for z in ZONES], "nodata": flags[i],
         })
         dist += 50  # Step 6 hard-codes 50 m between nodes, whatever spacing Step 1 used
     return rows

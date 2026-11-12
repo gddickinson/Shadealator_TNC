@@ -57,8 +57,19 @@ def build() -> dict:
         names = ("setToZero", "offsetBy1") + (("addLC",) if variant != "step6" else ())
         f = ts.load(variant, names)
         transforms[variant] = {n: f[n](TRANSFORM_INPUT) for n in names}
+    # Step 6 with NoData (-9999) injected into a few inputs, for every Step 6 script
+    base = pipeline.run({"length_m": 300})["nodes"]
+    holes = [dict(n) for n in base]
+    holes[1]["ELEVATION"] = -9999.0
+    holes[2]["TOPO_S"] = -9999.0
+    holes[3]["LC_T1_S1"] = -9999.0
+    holes[3]["ELE_T2_S4"] = -9999.0
+    holes[4]["TOPO_W"] = -2.5
+    step6_nodata = {"nodes": _clean(holes),
+                    "rows": {v: _clean(pipeline.step6_rows(holes, v)) for v in pipeline.STEP6_LC}}
     return {
         "cases": cases,
+        "step6_nodata": step6_nodata,
         "gradient": [{"z": z, "lengths": L, "smooth": s, "out": grad(z, L, s)} for z, L, s in GRADIENT_CASES],
         "transforms": {"input": TRANSFORM_INPUT, "out": transforms},
     }
