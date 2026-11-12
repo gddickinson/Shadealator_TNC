@@ -1,0 +1,8 @@
+# Web interface, tests and static-site build (pinned). The ArcGIS toolbox itself runs in ArcMap's Python 2.7
+# (arcpy, openpyxl, pypiwin32): see README.
+fastapi==0.162.2
+httpx==0.28.1
+pytest==9.2.0
+uvicorn==0.54.0
+numpy==2.5.4
+openpyxl==3.1.5

@@ -180,3 +180,33 @@ A model that converts tabular Excel data to shapefile format.
 - The tools can handle processing data in blocks for large datasets
 
 This toolbox represents a comprehensive workflow for preparing spatial data for stream temperature and shade modeling, particularly useful for understanding thermal dynamics in river systems and riparian restoration planning.
+
+## Web interface
+
+A web page that explains the workflow and runs its maths without ArcGIS: **https://gddickinson.github.io/Shadealator_TNC/**
+(published from `main` by `.github/workflows/pages.yml`).
+
+- **Workflow**: the seven steps, their inputs, outputs and formulas, and what each needs (arcpy, Excel).
+- **Demo reach**: a synthetic stream in a valley. Steps 1-6 run in the browser: nodes and azimuths, channel width,
+  elevation and gradient, topographic angles W/S/E, land-cover and ground samples on perpendicular transects, and the
+  Shade-a-lator columns Step 6 writes (all four Step 6 variants). The JavaScript is checked number for number against
+  the scripts' own Python functions (`shadealator/web/static/pipeline.test.mjs`).
+- **Silver Creek**: the committed run, read from `output.xlsx` (inputs) and `output2.xlsx` (shade), node by node.
+
+What cannot run on the web: reading ArcGIS feature classes and rasters (arcpy) and the shade calculation itself,
+which is VBA in `shade_GD.xlsm` (not in this repository).
+
+### Run the web app
+
+```bash
+pip install -r requirements-web.txt
+python run_web.py            # http://127.0.0.1:8120
+python -m pytest -q tests    # API, static build, the original functions, and the JS engine (needs node)
+```
+
+The local app adds **Check against Python** on the demo page: the same reach run through the original Step-script
+functions (loaded with `ast` by `shadealator/ttools_source.py`, without arcpy) and compared with the browser.
+
+![Home](docs/img/home.png)
+![Demo reach](docs/img/demo.png)
+![Silver Creek results](docs/img/results.png)

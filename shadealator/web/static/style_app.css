@@ -1,0 +1,28 @@
+/* Shade-a-lator TNC: accent palette (leaf green, sun amber, water blue) and page styles (theme in style.css). */
+:root { --accent:#59f0a0; --accent2:#ffb347; --accent3:#4fc3ff; --glow:rgba(89,240,160,.12); }
+button, .btn, .seg button.on { color:#03140b; }
+.two > *, .side > *, .row > * { min-width:0; }
+.hero .btn { margin-right:10px; }
+.badge { display:inline-block; font:11px var(--mono); padding:2px 8px; border-radius:3px; border:1px solid var(--line); color:var(--mute); margin:2px 4px 2px 0; }
+.badge.web { color:var(--accent); border-color:color-mix(in srgb, var(--accent) 50%, transparent); }
+.badge.need { color:var(--warn); border-color:color-mix(in srgb, var(--warn) 50%, transparent); }
+.badge.no { color:var(--bad); border-color:color-mix(in srgb, var(--bad) 50%, transparent); }
+.step { display:grid; grid-template-columns:54px 1fr; gap:14px; }
+.step .num { font:600 30px var(--mono); color:var(--accent); text-shadow:0 0 16px var(--glow); }
+.step ul { margin:4px 0; padding-left:18px; } .step li { font-size:14px; }
+.notice { border-left:3px solid var(--warn); background:rgba(255,210,63,.06); padding:10px 16px; border-radius:0 4px 4px 0; margin:14px 0; }
+.plot { position:relative; }
+.plot canvas { display:block; width:100%; background:rgba(3,5,10,.6); border:1px solid var(--line); border-radius:6px; cursor:crosshair; touch-action:none; }
+.tip { position:absolute; pointer-events:none; background:#080b17; border:1px solid var(--line); border-radius:4px; padding:6px 9px; font:12px/1.45 var(--mono); color:var(--ink); white-space:nowrap; display:none; z-index:3; box-shadow:0 6px 20px rgba(0,0,0,.5); }
+.legend { display:flex; flex-wrap:wrap; gap:4px 16px; margin:6px 0; font-size:13px; color:var(--mute); }
+.legend i { display:inline-block; width:14px; height:4px; border-radius:2px; vertical-align:middle; margin-right:6px; }
+.legend i.sq { width:12px; height:12px; }
+.ctlgroup { border:1px solid var(--line); border-radius:6px; padding:4px 12px 10px; margin:10px 0; min-width:0; }
+.ctlgroup legend { font:12px var(--mono); color:var(--accent2); text-transform:uppercase; letter-spacing:.1em; padding:0 6px; }
+.ctl.check label { display:flex; gap:8px; align-items:center; color:var(--ink); }
+.kv { display:grid; grid-template-columns:auto 1fr; gap:2px 14px; font-size:14px; } .kv dt { color:var(--mute); } .kv dd { margin:0; font-family:var(--mono); }
+.ramp { height:10px; border-radius:3px; border:1px solid var(--line); }
+td.num, th.num { text-align:right; font-family:var(--mono); }
+.tbl td { font-size:13px; }
+.check-out { font:13px var(--mono); }
+.tbl td:first-child { white-space:nowrap; }

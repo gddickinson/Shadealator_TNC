@@ -6,5 +6,6 @@ synthetic      synthetic stream reach (centreline, banks, DEM, vegetation raster
 geometry       Step 1 node/azimuth and Step 2 channel width without arcpy geometry
 pipeline       Steps 1-6 on the synthetic reach, using the original functions
 results        the committed Silver Creek run (output.xlsx inputs, output2.xlsx shade)
+workflow       the seven toolbox steps (descriptions for the web pages)
 web/           FastAPI app and static front end
 """
