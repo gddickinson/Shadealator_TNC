@@ -83,3 +83,15 @@ def test_z_units_conversion(step):
     # Regression: a numeric conversion factor was meant to be used as is (the scripts read the undefined name
     # `zunits`, so the NameError fell through to None and Steps 4/5 then crashed dividing -9999 by None).
     assert conv("0.01") == 0.01
+
+
+def test_step5_sample_raster_uses_the_sampled_rasters_cell_size():
+    """Regression: Step 5 took the cell size from the elevation raster for every raster it sampled, so a land-cover
+    raster with a different cell size was read at the wrong cells."""
+    f = ts.load("step5", ("sample_raster", "coord_to_array"))
+    dem = FakeRaster(np.zeros((10, 10)), 0, 0, 1.0, "dem")  # 1 m cells
+    cover = FakeRaster(np.arange(25, dtype=float).reshape(5, 5), 0, 0, 2.0, "cover")  # 2 m cells
+    ts.set_globals(f, z_raster=dem)
+    pts = [[7.0, 3.0, 7.0, 3.0, 1, 0, 0, 0, 1, 1, "T1_S1"]]  # x = 7, y = 3: cover column 3, row 3 from the north
+    out = f["sample_raster"]([0, 0, 10, 10], pts, cover, None)
+    assert out[0][11] == cover.array[3, 3]
