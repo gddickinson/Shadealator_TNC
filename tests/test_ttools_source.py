@@ -72,3 +72,14 @@ def test_step6_transforms():
     veg = ts.load("step6_addveg", ("offsetBy1", "addLC"))
     assert veg["addLC"]([0, 499, 500, 6000]) == [1001, 1001, 501, 5001]
     assert veg["offsetBy1"]([-5, 12.5, 9000]) == [1, 13.5, 5001]
+
+
+@pytest.mark.parametrize("step", ["step3", "step4", "step5"])
+def test_z_units_conversion(step):
+    conv = ts.fn(step, "from_z_units_to_meters_con")
+    assert conv("Meters") == 1.0
+    assert conv("Feet") == 0.3048
+    assert conv("Other") is None
+    # Regression: a numeric conversion factor was meant to be used as is (the scripts read the undefined name
+    # `zunits`, so the NameError fell through to None and Steps 4/5 then crashed dividing -9999 by None).
+    assert conv("0.01") == 0.01
