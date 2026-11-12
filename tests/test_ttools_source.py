@@ -95,3 +95,31 @@ def test_step5_sample_raster_uses_the_sampled_rasters_cell_size():
     pts = [[7.0, 3.0, 7.0, 3.0, 1, 0, 0, 0, 1, 1, "T1_S1"]]  # x = 7, y = 3: cover column 3, row 3 from the north
     out = f["sample_raster"]([0, 0, 10, 10], pts, cover, None)
     assert out[0][11] == cover.array[3, 3]
+
+
+def _north_blocks():
+    f = ts.load("step4", ("create_blocks", "find_intersection", "nested_dict"))
+
+    class Py2Dict(dict):  # the script sorts nodeDict.keys() in place, as Python 2 allowed
+        def keys(self):
+            return list(super().keys())
+    node_dict = Py2Dict({1: f["nested_dict"]()})
+    node_dict[1]["STREAM_ID"], node_dict[1]["Z_NODE"] = 1, 100.0
+    node_dict[1]["POINT_X"], node_dict[1]["POINT_Y"] = 523.0, 517.0
+    ts.set_globals(f, nodeDict=node_dict, azimuths=[45, 90, 135, 180, 225, 270, 315, 360])
+    return f["create_blocks"](node_dict, 100, 90, 250)
+
+
+def test_step4_north_is_azimuth_360():
+    """Regression: the eight-direction mode used azimuth 365 for north, so the 'N' search line ran 5 degrees east of
+    north."""
+    src = (ROOT / ts.SCRIPTS["step4"]).read_text()
+    assert "365" not in src
+    assert "azimuths = [45,90,135,180,225,270,315,360]" in src
+
+
+def test_step4_blocks_split_a_north_line_into_sensible_pieces():
+    """With azimuth 360 the block code must use the cos branch (sin(360 deg) is ~0), as it does for 0 and 180."""
+    pieces = sorted((s[8], s[9]) for b in _north_blocks().values() for s in b["samples"] if s[2] == 360)
+    assert pieces and all(0 <= a <= b <= 250 for a, b in pieces)
+    assert pieces[0][0] == 0 and pieces[-1][1] == 250

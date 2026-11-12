@@ -546,7 +546,7 @@ def create_blocks(NodeDict, block_size, last_azimuth, searchDistance_max):
                         # distance in fc units from node to
                         # that intersection
                         if intersects:
-                            if a in [0, 180]:
+                            if a in [0, 180, 360]:
                                 # need to use the y directon for these
                                 distance.append((inter1_y - node_y) / cos(radians(a)))
                             else:
@@ -883,7 +883,7 @@ try:
     y_cellsize = float(arcpy.GetRasterProperties_management(z_raster, "CELLSIZEY").getOutput(0))
 
     if topo_directions == 2: # All directions
-        azimuths = [45,90,135,180,225,270,315,365]
+        azimuths = [45,90,135,180,225,270,315,360]
         last_azimuth = 45
     else:
         azimuths = [270,180,90]
@@ -891,14 +891,14 @@ try:
 
     azimuthdict = {45:"TOPO_NE",90:"TOPO_E",135:"TOPO_SE",
                    180:"TOPO_S",225:"TOPO_SW",270:"TOPO_W",
-                   315:"TOPO_NW",365:"TOPO_N"}
+                   315:"TOPO_NW",360:"TOPO_N"}
 
     # build a dictionary of the cell size in azimuth directions
     disXY = (hypot(x_cellsize,y_cellsize))
     disX = (x_cellsize)
     disY = (y_cellsize)
 
-    azimuthdisdict = {45:disXY,90:disX,135:disXY,180:disY,225:disXY,270:disX,315:disXY,365:disY}
+    azimuthdisdict = {45:disXY,90:disX,135:disXY,180:disY,225:disXY,270:disX,315:disXY,360:disY}
     del(disX,disXY,disY)
 
     # Build the topo field names

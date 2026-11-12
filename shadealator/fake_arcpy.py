@@ -66,3 +66,11 @@ def RasterToNumPyArray(raster, lower_left=None, ncols=None, nrows=None, nodata_t
             if lo < hi:
                 out[i, lo - c0:hi - c0] = raster.array[r, lo:hi]
     return out
+
+
+def AddMessage(msg):  # noqa: N802 - arcpy API name; messages are dropped outside ArcGIS
+    pass
+
+
+def AddWarning(msg):  # noqa: N802
+    pass

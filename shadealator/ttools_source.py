@@ -7,6 +7,7 @@ the scripts import, and a stand-in `arcpy` (fake_arcpy.py) for the raster calls.
 modified or executed, so the web app and the tests run exactly the code ArcMap runs.
 """
 import ast
+from collections import defaultdict
 import itertools
 import math
 import sys
@@ -36,7 +37,7 @@ SCRIPTS = {
 def base_namespace() -> dict:
     """Globals the extracted functions expect (what the scripts import at the top, plus a fake arcpy)."""
     ns = {"__name__": "ttools_extract", "np": np, "numpy": np, "itertools": itertools, "sys": sys,
-          "traceback": traceback, "arcpy": fake_arcpy}
+          "traceback": traceback, "arcpy": fake_arcpy, "defaultdict": defaultdict}
     for name in ("sin", "cos", "radians", "degrees", "atan2", "hypot", "ceil", "sqrt"):
         ns[name] = getattr(math, name)
     return ns
