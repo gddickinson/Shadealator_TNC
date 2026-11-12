@@ -10,6 +10,7 @@
 | `Step4_MeasureTopographicAngles.py` | TTools: TOPO_W/S/E (`get_topo_angles`, `build_search_array`) |
 | `Step5_Sample_Landcover_PointMethod_Array.py` | TTools: LC_/ELE_ samples on transects (`create_lc_point_list`, `sample_raster`; `perp` option) |
 | `Step6_Interact_with_Shade*.py` | Write Shade-a-lator Main Menu (output.xlsx), run shade_GD.xlsm macros (Excel, win32com); variants addVeg / LeftBank / RightBank |
+| `Step6_shade_inputs.py` | Pure helpers for Step 6 (no arcpy): `NodataTracker`, `keep_blank`, `node_distances`, `incisions`; keep next to the Step 6 scripts |
 | `Step7_Import_shadeData.py` | output2.xlsx -> dbf -> XY layer -> shapefile in the map |
 | `ExcelToTable.py` | Esri Excel-to-table tool |
 | `blank*.xlsx`, `output.xlsx`, `output2.xlsx` | Templates and the committed Silver Creek run (inputs / shade) |
@@ -39,4 +40,5 @@ Connections: `pipeline` -> `ttools_source` (+`fake_arcpy`) -> Step scripts; `pip
 | `scripts/screenshots.py` | Playwright smoke test / README images (docs/img) |
 | `scripts/make_engine_fixture.py` | writes `tests/fixtures/engine_cases.json` (Python results for the JS test) |
 | `tests/test_ttools_source.py` | extracted original functions, regression tests for the fixes |
+| `tests/test_step6_inputs.py` | Step 6 NoData / distance / incision (module, scripts, web pipeline) |
 | `tests/test_web.py` | API, static build, fixture currency, node engine test |

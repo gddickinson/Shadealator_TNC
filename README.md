@@ -64,6 +64,10 @@ Samples land cover/vegetation height in multiple directions at different distanc
 ### Step 6: Interact with Shade-a-lator (Step6_Interact_with_Shade.py)
 Exports data to Excel and runs the Shade-a-lator model using Excel macros. Several variations of this script exist to handle different vegetation configurations.
 
+Step 6 needs `Step6_shade_inputs.py` in the same folder. Off-raster (-9999) inputs are written as blank cells and
+flagged in a NODATA column of output2.xlsx; Distance comes from STREAM_KM and incision from an optional INCISION field
+on the nodes (else row x 50 m and 1.0 m, with a warning).
+
 ### Step 7: Import Shade Data (Step7_Import_shadeData.py)
 Imports the Shade-a-lator results back into ArcGIS as a feature class.
 

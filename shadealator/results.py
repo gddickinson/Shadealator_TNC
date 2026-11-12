@@ -6,7 +6,8 @@ for 9 zones on each bank). output2.xlsx is Sheet1 after the Shade-a-lator macros
 LATITUDE, LONGITUDE and SHADE (fraction, 0-1). Rows of the two files are the same nodes in the same order.
 
 A node is flagged `missing` when its elevation is 0 (Step 6's setToZero applied to a -9999 off-DEM sample) or a riparian
-ground elevation is -1 or -9999; the "complete" summary values leave those nodes out.
+ground elevation is -1 or -9999; the "complete" summary values leave those nodes out. These workbooks come from the
+2017 Step 6 (before the NoData / distance / incision fixes) and are shown as committed, not regenerated.
 """
 import math
 import statistics

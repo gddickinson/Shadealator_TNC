@@ -14,7 +14,7 @@ route('about', () => {
     <li>ArcMap 10.3.1 or later with its Python 2.7, Microsoft Excel with macros enabled, and the
       <code>openpyxl</code> and <code>pypiwin32</code> packages (<code>pip.exe install openpyxl pypiwin32</code> in
       ArcGIS's Python Scripts folder).</li>
-    <li>The scripts folder with the Step scripts, the Excel templates and <code>shade_GD.xlsm</code> (the Shade-a-lator
+    <li>The scripts folder with the Step scripts, <code>Step6_shade_inputs.py</code> (helpers the Step 6 scripts import), the Excel templates and <code>shade_GD.xlsm</code> (the Shade-a-lator
       workbook with George's data-transfer macros; not in this repository). Step 6 and 7 look for them under
       <code>C:\\Google Drive\\SiCr_Digitization\\scripts</code> (Step 6 addVeg variants: <code>C:\\arcgis\\shade_a_lator\\scripts</code>).</li>
     <li>Add <code>Georges_Tools.tbx</code> to ArcMap and run Script1 to Script7 in order, pointing them at the centreline,

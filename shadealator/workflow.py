@@ -32,7 +32,9 @@ STEPS = [
         "author": "Ryan Michie (TTools 0.97)",
         "does": "Takes the lowest DEM value within a few cells of each node as the stream elevation, then the gradient "
                 "between consecutive nodes. With smoothing on, a node higher than the one upstream is skipped and the "
-                "drop is spread over the longer distance.",
+                "drop is spread over the longer distance. End effect (as in upstream TTools): the smoothing distance is "
+                "summed over the nodes downstream of the current one, so near the downstream end it runs short, and "
+                "nodes after a hollow that never drains keep a gradient of 0.",
         "inputs": ["Nodes", "Search cells around each node", "Smoothing flag", "Elevation raster and its z units"],
         "outputs": ["ELEVATION, Z_NODE (the node's own cell), GRADIENT on the nodes"],
         "needs": ["arcpy (raster reading)"],
@@ -72,8 +74,11 @@ STEPS = [
         "author": "George (2017), with three variants: _addVeg, _addVegLeftBank, _addVegRightBank",
         "does": "Copies the node fields into the Shade-a-lator 'Main Menu' template (blankMainMenu.xlsx -> "
                 "output.xlsx) with the run settings, then opens shade_GD.xlsm in Excel and runs its macros, which "
-                "compute shade and write it to output2.xlsx. Negative elevations and topographic angles are set to "
-                "0; land-cover values get +1 (Shade-a-lator has no riparian code 0). The addVeg variants set zone 1 "
+                "compute shade and write it to output2.xlsx. Off-raster samples (-9999) are written as blank cells "
+                "and the node is flagged in a NODATA column; other negative elevations and topographic angles are "
+                "set to 0; land-cover values get +1 (Shade-a-lator has no riparian code 0). Distance comes from "
+                "STREAM_KM and channel incision from an INCISION field if present (else row x 50 m and 1.0 m, with "
+                "a warning). Shared helpers: Step6_shade_inputs.py, kept next to the Step 6 scripts. The addVeg variants set zone 1 "
                 "to 1000 wherever it is under 500 (10 m and 5 m when the land cover is height in cm, as in the "
                 "maxheight_cm_int raster named in Step 5's settings) on both, the left or the right bank, and cap "
                 "codes at 5000.",
@@ -82,7 +87,7 @@ STEPS = [
                    "Ryan-Stolzenbach factor, elevation or zone width, riparian extinction"],
         "outputs": ["output.xlsx (Shade-a-lator inputs)", "output2.xlsx (SHADE per node)"],
         "needs": ["arcpy", "Windows + Excel (win32com)", "shade_GD.xlsm (not in this repository)"],
-        "reproduced": "The column layout and the scripts' own setToZero / offsetBy1 / addLC. The shade calculation "
+        "reproduced": "The column layout, the scripts' own setToZero / offsetBy1 / addLC and Step6_shade_inputs.py. The shade calculation "
                       "itself is VBA inside shade_GD.xlsm, which is not in the repository, so it is not reproduced.",
         "formula": "",
     },

@@ -62,8 +62,13 @@ route('results', async () => {
     <div class="tile"><b>${f(s.path_length_m / 1000, 1)} km</b><span>path through the nodes (median spacing ${f(s.median_node_spacing_m, 0)} m)</span></div>
     <div class="tile"><b>${s.nodes_missing_data}</b><span>nodes with some inputs off the DEM</span></div>
   </div>
+  <div class="notice"><b>Committed output from the earlier code.</b> These workbooks were produced in 2017 by the Step 6
+    scripts as they were then, before the fixes on this site's branch: Distance written as row x 50 m, incision fixed at
+    1.0 m, and off-raster (-9999) values passed through as 0 m / 0° / code 1. They cannot be regenerated here because
+    the Shade-a-lator workbook (shade_GD.xlsm) is not in the repository; re-running Step 6 in ArcMap would now write
+    those inputs as blanks with a NODATA flag.</div>
   <div class="notice"><b>Read the highest values with care.</b> ${s.nodes_zero_elevation} nodes have an elevation of 0 m in
-    the sheet: their DEM sample was off the raster (-9999) and Step 6's setToZero turned it into 0, about 1480 m below
+    the sheet: their DEM sample was off the raster (-9999) and the old Step 6's setToZero turned it into 0, about 1480 m below
     their banks. Their shade (up to ${pct(s.shade_max)}) and some of their topographic angles (up to about 90°) are
     artefacts of that. Leaving out all ${s.nodes_missing_data} nodes with missing inputs, mean shade is
     ${pct(s.shade_mean_complete)} and the maximum ${pct(s.shade_max_complete)}. Missing nodes are drawn with a white ring.</div>

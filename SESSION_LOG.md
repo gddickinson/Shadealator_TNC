@@ -17,3 +17,15 @@
   - Step 4 uses azimuth 365 for north in the 8-direction mode, so the "N" search line points 5 deg east of north
     (not used by Step 6, which takes W/S/E only). Fixing it is in the module-level code, which cannot be tested here.
 - Shade itself (shade_GD.xlsm VBA) is not in the repository, so it is not reproduced.
+
+## 2026-11-12: follow-up fixes (George: "fix any other problems")
+- Fix: Step 6 wrote off-DEM -9999 values as 0 m / 0 deg / code 1; now blank cells + NODATA flag column in output2.xlsx
+  (helpers in new Step6_shade_inputs.py, which must sit next to the Step 6 scripts).
+- Fix: Step 6 Distance from STREAM_KM chainage and incision from an INCISION field; row x 50 m / 1.0 m only as a
+  fall-back with an ArcGIS warning.
+- Fix: Step 4 eight-direction north azimuth 365 -> 360 (and create_blocks treats 360 like 0/180).
+- Kept: Step 3 gradient-smoothing end effect (matches upstream TTools); documented on the Workflow page and in a test.
+- Silver Creek page marks output.xlsx / output2.xlsx as committed output of the 2017 code (not regenerated: the VBA
+  model is not in the repo).
+- Not verifiable here: how shade_GD.xlsm's macros treat blank elevation / angle / code cells (the Main Menu notes say
+  blank ground elevations are allowed). Check one run in ArcMap/Excel.

@@ -38,7 +38,8 @@ route('workflow', async () => {
   </section>`)}
   <h2>Order of the data</h2>
   <p>Step 1 writes nodes with the upstream end first. Step 3 computes gradients in that order (upstream first) and
-    Step 6 writes rows in it too, numbering Distance 0, 50, 100 ... m from the first row: Step 6 uses a fixed 50 m
-    whatever node spacing Step 1 was given (the Silver Creek run used about 50 m, so its distances are right).</p>
+    Step 6 writes rows in it too, with Distance measured from the first row along STREAM_KM. Before the November 2026
+    fixes Step 6 wrote Distance as row x 50 m, a fixed 1.0 m incision and -9999 (off-DEM) values as 0; the committed
+    Silver Creek run was made that way.</p>
   <p><a class="btn" href="#/demo">See it on the demo reach</a></p>`;
 });
