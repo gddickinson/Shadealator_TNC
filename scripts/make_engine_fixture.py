@@ -49,7 +49,7 @@ def build() -> dict:
     cases = {}
     for name, params in CASES.items():
         r = pipeline.run(params)
-        cases[name] = _clean({"params": r["params"], "nodes": r["nodes"], "step6": r["step6"],
+        cases[name] = _clean({"params": r["params"], "nodes": r["nodes"], "step6": r["step6"], "warnings": r["warnings"],
                               "lc_points": r["lc_points"], "raster": r["raster"]})
     grad = ts.fn("step3", "calculate_gradient")
     transforms = {}
@@ -65,7 +65,12 @@ def build() -> dict:
     holes[3]["LC_T1_S1"] = -9999.0
     holes[3]["ELE_T2_S4"] = -9999.0
     holes[4]["TOPO_W"] = -2.5
-    step6_nodata = {"nodes": _clean(holes),
+    for n in holes:  # no INCISION field and a missing chainage: both fall-backs
+        n.pop("INCISION")
+    holes[5]["STREAM_KM"] = None
+    warnings = []
+    pipeline.step6_rows(holes, "step6", warnings)
+    step6_nodata = {"nodes": _clean(holes), "warnings": warnings,
                     "rows": {v: _clean(pipeline.step6_rows(holes, v)) for v in pipeline.STEP6_LC}}
     return {
         "cases": cases,

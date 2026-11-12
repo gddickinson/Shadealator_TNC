@@ -54,3 +54,34 @@ def test_pipeline_step6_rows_blank_and_flag_nodata():
     assert rows[1]["elevation"] is None and rows[1]["nodata"] == 1
     assert rows[2]["topo_s"] is None and rows[2]["ele_left"][8] is None and rows[2]["nodata"] == 1
     assert rows[0]["nodata"] == 0 and rows[0]["elevation"] > 1000
+
+
+def test_node_distances_follow_the_chainage():
+    assert s6.node_distances([0.6, 0.55, 0.5, 0.47]) == ([0.0, pytest.approx(50.0), pytest.approx(100.0),
+                                                          pytest.approx(130.0)], False)
+    d, fb = s6.node_distances([0.3, 0.2, None])
+    assert fb and d == [0.0, 50.0, 100.0]
+
+
+def test_incisions_from_a_field_or_the_default():
+    assert s6.incisions(None, 3) == ([1.0, 1.0, 1.0], True)
+    assert s6.incisions([0.4, -9999, 2.0], 3) == ([0.4, 1.0, 2.0], True)
+    assert s6.incisions([0.4, 0.5], 2) == ([0.4, 0.5], False)
+
+
+@pytest.mark.parametrize("script", STEP6)
+def test_step6_scripts_take_distance_and_incision_from_the_data(script):
+    """Regression: Step 6 wrote Distance as row x 50 m whatever node spacing Step 1 used, and 1.0 m incision for every
+    node."""
+    src = (ROOT / script).read_text()
+    assert "dist += 50" not in src and "incision = 1.0" not in src
+    assert "node_distances(" in src and "incisions(" in src
+    assert "arcpy.AddWarning" in src
+
+
+def test_pipeline_distance_and_incision_come_from_the_nodes():
+    r = pipeline.run({"length_m": 300, "node_dx_m": 30, "incision_m": 0.7})
+    rows = r["step6"]
+    assert [round(x["distance"], 6) for x in rows[:3]] == [0, 30, 60]
+    assert all(x["incision"] == 0.7 for x in rows)
+    assert r["warnings"] == []

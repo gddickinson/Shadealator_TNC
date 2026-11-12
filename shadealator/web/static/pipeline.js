@@ -17,7 +17,7 @@ export function run(p, scene = null) {
   const nodes = createNodes(centre, p.node_dx_m, STREAM_ID).map(([id, sid, km, len, x, y, az]) => {
     const [w, lb, rb] = channelWidth(x, y, left, right);
     return { NODE_ID: id, STREAM_ID: sid, STREAM_KM: km, LENGTH: len, X: x, Y: y, STRM_AZMTH: az,
-      CHANWIDTH: w, LEFT: lb, RIGHT: rb };
+      CHANWIDTH: w, LEFT: lb, RIGHT: rb, INCISION: p.incision_m };
   });
 
   // Step 3
@@ -48,6 +48,7 @@ export function run(p, scene = null) {
     }
   }
 
-  return { params: p, nodes, step6: step6Rows(nodes, p.step6_variant, ZONES), lc_points: lc,
+  const warnings = [];
+  return { params: p, nodes, step6: step6Rows(nodes, p.step6_variant, ZONES, warnings), warnings, lc_points: lc,
     raster: { x_min: dem.x_min, y_min: dem.y_min, cellsize: dem.cellsize, ncols: dem.ncols, nrows: dem.nrows } };
 }

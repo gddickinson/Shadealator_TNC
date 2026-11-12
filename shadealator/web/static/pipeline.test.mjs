@@ -28,6 +28,7 @@ for (const [name, c] of Object.entries(fx.cases)) {
   c.nodes.forEach((n, i) => deepClose(js.nodes[i], n, `${name} node ${n.NODE_ID}`));
   deepClose(js.step6, c.step6, `${name} step6`);
   deepClose(js.lc_points, c.lc_points, `${name} lc_points`);
+  assert.deepEqual(js.warnings, c.warnings, `${name} warnings`);
 }
 
 // Rasters: a spot check of whole-array agreement for the default case.
@@ -49,5 +50,9 @@ for (const [variant, rows] of Object.entries(fx.step6_nodata.rows)) {
   assert.deepEqual(js.map(r => r.nodata), [0, 1, 1, 1, 0, 0, 0]);
   assert.equal(js[1].elevation, null);
 }
+const w = [];
+step6Rows(fx.step6_nodata.nodes, 'step6', [1, 2, 3, 4, 5, 6, 7, 8, 9], w);
+assert.deepEqual(w, fx.step6_nodata.warnings);
+assert.equal(w.length, 2);
 
 console.log(`pipeline.test.mjs: ${checks} checks passed over ${Object.keys(fx.cases).length} scenes`);

@@ -276,15 +276,17 @@ try:
                          "flagged 1 in the NODATA column of {1}".format(sum(NODATA_FLAG), saveName2))
 
     numberNodes = len(FID)
-    DISTANCE = []
-    CHANNEL_INC = []
+    # Distance along the stream from Step 1's chainage (STREAM_KM), not row x 50 m
+    STREAM_KM = extractData(nodes_fc, 'STREAM_KM') if 'STREAM_KM' in existingFields else [None] * numberNodes
+    DISTANCE, distanceFallback = node_distances(STREAM_KM)
+    if distanceFallback:
+        arcpy.AddWarning("STREAM_KM missing on some nodes: Distance written as row x 50 m")
 
-    dist = 0
-    incision = 1.0
-    for i in range(numberNodes):
-        DISTANCE.append(dist)
-        CHANNEL_INC.append(incision)
-        dist += 50
+    # Channel incision from an INCISION field (m) if the nodes have one, else 1.0 m
+    INCISION = extractData(nodes_fc, 'INCISION') if 'INCISION' in existingFields else None
+    CHANNEL_INC, incisionDefault = incisions(INCISION, numberNodes)
+    if incisionDefault:
+        arcpy.AddWarning("No INCISION field (or missing values): channel incision written as 1.0 m")
 
     #write data to excel file
 

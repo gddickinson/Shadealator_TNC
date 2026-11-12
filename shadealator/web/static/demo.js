@@ -110,7 +110,7 @@ route('demo', async () => {
       { xlabel: 'distance from downstream end (m)', ylabel: 'degrees', mark, height: 220, tip: i => `${tip(i)}<br>W ${f(res.nodes[i].TOPO_W, 2)}° · S ${f(res.nodes[i].TOPO_S, 2)}° · E ${f(res.nodes[i].TOPO_E, 2)}°`, onPick: i => select(res.nodes[i].NODE_ID) });
     $('#table').innerHTML = `<table class="tbl"><tr><th>Row</th><th class="num">Distance</th><th class="num">Elev.</th><th class="num">Aspect</th><th class="num">Width</th><th class="num">Topo W</th><th class="num">S</th><th class="num">E</th><th class="num">LC L1</th><th class="num">LC R1</th></tr>
       ${list(res.step6, (r, i) => `<tr class="click" data-i="${i}"><td>${i + 1}${res.nodes[i].NODE_ID === sel ? ' ◀' : ''}</td><td class="num">${r.distance}</td><td class="num">${f(r.elevation)}</td><td class="num">${f(r.aspect, 1)}</td><td class="num">${f(r.wetted_width)}</td><td class="num">${f(r.topo_w)}</td><td class="num">${f(r.topo_s)}</td><td class="num">${f(r.topo_e)}</td><td class="num">${f(r.lc_left[0], 0)}</td><td class="num">${f(r.lc_right[0], 0)}</td></tr>`)}</table>`;
-    if (recompute) $('#pyout').textContent = '';
+    if (recompute) $('#pyout').innerHTML = res.warnings.length ? `<span class="static-note">Step 6 warnings: ${esc(res.warnings.join('; '))}</span>` : '';
   }
 
   function drawNode() {

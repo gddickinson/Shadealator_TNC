@@ -101,16 +101,39 @@ export const STEP6 = {
 // and flag the node, instead of passing through setToZero / offsetBy1 as 0 m / code 1.
 export const isNodata = v => v == null || Number.isNaN(v) || v < -9998;
 
+// Step6_shade_inputs.node_distances: distance from the first row along STREAM_KM chainage; row x 50 m if any is missing.
+export function nodeDistances(km) {
+  if (!km.length || km.some(isNodata)) return { d: km.map((_, i) => i * 50.0), fallback: true };
+  const d = [0.0];
+  for (let i = 1; i < km.length; i++) d.push(d[i - 1] + Math.abs(Number(km[i - 1]) - Number(km[i])) * 1000.0);
+  return { d, fallback: false };
+}
+
+// Step6_shade_inputs.incisions: from an INCISION field (null = no field); missing or negative values take 1.0 m.
+export function incisions(values, n) {
+  if (values == null) return { v: Array(n).fill(1.0), fallback: true };
+  let fallback = false;
+  const v = values.map(x => { if (isNodata(x) || x < 0) { fallback = true; return 1.0; } return Number(x); });
+  return { v, fallback };
+}
+
 // The Shade-a-lator "Main Menu" columns Step 6 writes, one object per node in feature-class order.
-export function step6Rows(nodes, variant, zones) {
+// Fall-backs for distance / incision push a message onto `warnings`, as the scripts warn in ArcGIS.
+export function step6Rows(nodes, variant, zones, warnings = null) {
   const v = STEP6[variant];
   if (!v) throw new Error(`unknown Step 6 variant ${variant}`);
   const flags = nodes.map(() => 0);
   const val = (i, k, fn = x => x) => { const x = nodes[i][k]; if (isNodata(x)) { flags[i] = 1; return null; } return fn(x); };
   const lcFn = k => (v.add.includes(k) ? addLC : v.offset);
+  const dist = nodeDistances(nodes.map(n => n.STREAM_KM ?? null));
+  const inc = incisions(nodes.every(n => 'INCISION' in n) ? nodes.map(n => n.INCISION) : null, nodes.length);
+  if (warnings) {
+    if (dist.fallback) warnings.push('STREAM_KM missing on some nodes: Distance written as row x 50 m');
+    if (inc.fallback) warnings.push('No INCISION field (or missing values): channel incision written as 1.0 m');
+  }
   const rows = nodes.map((n, i) => ({
-    node: n.STREAM_ID, distance: i * 50, elevation: val(i, 'ELEVATION', setToZero), aspect: n.STRM_AZMTH,
-    wetted_width: n.CHANWIDTH, nsdz_width: n.CHANWIDTH, incision: 1.0,
+    node: n.STREAM_ID, distance: dist.d[i], elevation: val(i, 'ELEVATION', setToZero), aspect: n.STRM_AZMTH,
+    wetted_width: n.CHANWIDTH, nsdz_width: n.CHANWIDTH, incision: inc.v[i],
     topo_w: val(i, 'TOPO_W', setToZero), topo_s: val(i, 'TOPO_S', setToZero), topo_e: val(i, 'TOPO_E', setToZero),
     lc_left: zones.map(z => val(i, `LC_T1_S${z}`, lcFn(`LC_T1_S${z}`))),
     lc_right: zones.map(z => val(i, `LC_T2_S${z}`, lcFn(`LC_T2_S${z}`))),

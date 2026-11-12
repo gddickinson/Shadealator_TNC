@@ -34,7 +34,8 @@ def run(params: dict | None = None) -> dict:
     for node_id, sid, km, length, x, y, az in rows:
         w, lb, rb = geometry.channel_width(x, y, left, right)
         nodes.append({"NODE_ID": node_id, "STREAM_ID": sid, "STREAM_KM": km, "LENGTH": length, "X": x, "Y": y,
-                      "STRM_AZMTH": az, "CHANWIDTH": w, "LEFT": lb, "RIGHT": rb})
+                      "STRM_AZMTH": az, "CHANWIDTH": w, "LEFT": lb, "RIGHT": rb,
+                      "INCISION": p["incision_m"]})  # an INCISION field, which Step 6 now reads
     by_id = {n["NODE_ID"]: n for n in nodes}
 
     # Step 3: lowest elevation within search_cells of the node, then the gradient (upstream first)
@@ -78,7 +79,9 @@ def run(params: dict | None = None) -> dict:
         n["ELE_" + pt[10]] = float(pt[12])
     samples_out = [[pt[0], pt[1], pt[5], pt[10], float(pt[11]), float(pt[12])] for pt in lc_points]
 
-    return {"params": p, "nodes": nodes, "step6": step6_rows(nodes, p["step6_variant"]), "lc_points": samples_out,
+    warnings = []
+    return {"params": p, "nodes": nodes, "step6": step6_rows(nodes, p["step6_variant"], warnings), "warnings": warnings,
+            "lc_points": samples_out,
             "raster": {"x_min": dem.x_min, "y_min": dem.y_min, "cellsize": cell, "ncols": dem.ncols,
                        "nrows": dem.nrows}}
 
@@ -91,11 +94,12 @@ STEP6_LC = {  # which transform each Step 6 script applies to the LC zone column
 }
 
 
-def step6_rows(nodes: list, variant: str = "step6") -> list:
+def step6_rows(nodes: list, variant: str = "step6", warnings: list | None = None) -> list:
     """The Shade-a-lator 'Main Menu' inputs Step 6 writes, one dict per node in feature-class order.
 
     As the scripts do: NoData (-9999) values become None (blank cells) and set the row's `nodata` flag; the other
-    values go through the chosen script's setToZero / offsetBy1 / addLC.
+    values go through the chosen script's setToZero / offsetBy1 / addLC. Distance comes from STREAM_KM and incision
+    from INCISION; their fall-backs (row x 50 m, 1.0 m) add a message to `warnings`, as the scripts warn in ArcGIS.
     """
     names = ("setToZero", "offsetBy1") + (("addLC",) if variant != "step6" else ())
     f = ts.load(variant, names)
@@ -114,15 +118,22 @@ def step6_rows(nodes: list, variant: str = "step6") -> list:
             k = "ELE_T%d_S%d" % (t, z)
             out[k] = col(k)
     flags = nodata.flag_column()
-    rows, dist = [], 0
+    dist, dist_fb = h.node_distances([n.get("STREAM_KM") for n in nodes])
+    inc, inc_fb = h.incisions([n.get("INCISION") for n in nodes] if all("INCISION" in n for n in nodes) else None,
+                              len(nodes))
+    if warnings is not None:
+        if dist_fb:
+            warnings.append("STREAM_KM missing on some nodes: Distance written as row x 50 m")
+        if inc_fb:
+            warnings.append("No INCISION field (or missing values): channel incision written as 1.0 m")
+    rows = []
     for i, n in enumerate(nodes):
         rows.append({
-            "node": n["STREAM_ID"], "distance": dist, "elevation": out["ELEVATION"][i], "aspect": n["STRM_AZMTH"],
-            "wetted_width": n["CHANWIDTH"], "nsdz_width": n["CHANWIDTH"], "incision": 1.0,
+            "node": n["STREAM_ID"], "distance": dist[i], "elevation": out["ELEVATION"][i], "aspect": n["STRM_AZMTH"],
+            "wetted_width": n["CHANWIDTH"], "nsdz_width": n["CHANWIDTH"], "incision": inc[i],
             "topo_w": out["TOPO_W"][i], "topo_s": out["TOPO_S"][i], "topo_e": out["TOPO_E"][i],
             "lc_left": [out["LC_T1_S%d" % z][i] for z in ZONES], "lc_right": [out["LC_T2_S%d" % z][i] for z in ZONES],
             "ele_left": [out["ELE_T1_S%d" % z][i] for z in ZONES],
             "ele_right": [out["ELE_T2_S%d" % z][i] for z in ZONES], "nodata": flags[i],
         })
-        dist += 50  # Step 6 hard-codes 50 m between nodes, whatever spacing Step 1 used
     return rows
